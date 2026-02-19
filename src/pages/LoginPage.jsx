@@ -7,6 +7,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  const DEMO_EMAIL = "test@gmail.com";
+  const DEMO_PASSWORD = "123456";
+
   const handleLogin = () => {
     setError("");
 
@@ -14,11 +17,6 @@ export default function LoginPage() {
       setError("Please enter email and password");
       return;
     }
-
-    // ✅ Demo authentication (replace later with real API)
-    // You can hardcode a test user for now:
-    const DEMO_EMAIL = "test@gmail.com";
-    const DEMO_PASSWORD = "123456";
 
     if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
       localStorage.setItem("auth", "true");
