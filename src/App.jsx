@@ -16,7 +16,7 @@ import GoogleCallback    from "./pages/Googlecallback";
 // App pages
 import PressMeetNow      from "./pages/PressMeetNow";
 import QAPage            from "./pages/QAPage";
-import QAView            from "./pages/Qaview";
+import QAView            from "./pages/QAView";
 import SettingsPage      from "./pages/SettingsPage";
 
 // ── Data section sub-pages ──
