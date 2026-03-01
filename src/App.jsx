@@ -16,18 +16,16 @@ import GoogleCallback    from "./pages/Googlecallback";
 // App pages
 import PressMeetNow      from "./pages/PressMeetNow";
 import QAPage            from "./pages/QAPage";
-import QAView            from "./pages/QAndAView";
+import QAView            from "./pages/QAViewer";
 import SettingsPage      from "./pages/SettingsPage";
 
 // ── Data section sub-pages ──
-// These are new pages. Create placeholder files if they don't exist yet.
-// Each will be a full page component in pages/data/
 import CriticismPage     from "./pages/data/CriticismPage";
+import CriticismListPage from "./pages/data/CriticismListPage";
 import DocumentsPage     from "./pages/data/DocumentsPage";
 import PartyDataPage     from "./pages/data/PartyDataPage";
 
 export default function App() {
-  // Restore theme on mount/refresh
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
     document.documentElement.setAttribute("data-theme", savedTheme);
@@ -53,29 +51,25 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          {/* Default → PressMeet */}
           <Route index element={<Navigate to="pressmeet" replace />} />
 
-          {/* Main pages */}
           <Route path="pressmeet" element={<PressMeetNow />} />
           <Route path="qa"        element={<QAPage />} />
           <Route path="qaview"    element={<QAView />} />
           <Route path="settings"  element={<SettingsPage />} />
 
-          {/* ── Data Section sub-routes ── */}
+          {/* ── Data Section ── */}
           <Route path="data">
-            {/* /app/data → redirect to criticism */}
             <Route index element={<Navigate to="criticism" replace />} />
-            <Route path="criticism" element={<CriticismPage />} />
-            <Route path="documents" element={<DocumentsPage />} />
-            <Route path="party"     element={<PartyDataPage />} />
+            <Route path="criticism"             element={<CriticismPage />} />
+            <Route path="criticism/list/:topic" element={<CriticismListPage />} />
+            <Route path="documents"             element={<DocumentsPage />} />
+            <Route path="party"                 element={<PartyDataPage />} />
           </Route>
 
-          {/* Legacy /app/documents redirect */}
           <Route path="documents" element={<Navigate to="/app/data/documents" replace />} />
         </Route>
 
-        {/* ── Fallback ── */}
         <Route path="*" element={<Navigate to="/login" replace />} />
 
       </Routes>

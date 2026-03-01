@@ -4751,3 +4751,1158 @@ textarea.variant-input:focus {
 [data-theme="dark"] .pd-tab:hover { background: #1c1e2c; }
 [data-theme="dark"] .pd-tab.active { background: rgba(99,102,241,0.15); }
 [data-theme="dark"] .pd-add-form { background: #181a26; border-color: #2a2d42; }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   QAView — Edit / Delete actions
+═════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Answer action buttons (Edit / Delete / Save / Cancel) ─────────────────── */
+.qav-answer-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+/* Show action buttons on hover or when card is in editing state */
+.qav-text-answer:hover .qav-answer-actions,
+.qav-text-answer.editing .qav-answer-actions {
+  opacity: 1;
+}
+
+.qav-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.qav-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Edit */
+.qav-edit-btn:hover {
+  border-color: var(--indigo);
+  color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+/* Delete */
+.qav-delete-btn {
+  color: var(--text-muted);
+}
+.qav-delete-btn:hover {
+  border-color: rgba(239,68,68,0.4);
+  color: #ef4444;
+  background: rgba(239,68,68,0.07);
+}
+
+/* Save */
+.qav-save-btn {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(16,185,129,0.07);
+}
+.qav-save-btn:hover {
+  background: rgba(16,185,129,0.14);
+}
+
+/* Cancel */
+.qav-cancel-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+
+/* ── Editing state on the card ──────────────────────────────────────────────── */
+.qav-text-answer.editing {
+  border-color: var(--border-focus);
+  background: var(--bg-white);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
+}
+
+/* ── Deleting fade-out ──────────────────────────────────────────────────────── */
+.qav-text-answer.deleting {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.qav-item-deleting {
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+/* ── Edit textarea ──────────────────────────────────────────────────────────── */
+.qav-edit-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-white);
+  line-height: 1.7;
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.qav-edit-textarea:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.10);
+}
+
+.qav-edit-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-top: 5px;
+}
+
+/* ── Spinner for saving/deleting state ──────────────────────────────────────── */
+.qav-action-spinner {
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--border);
+  border-top-color: var(--indigo);
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Delete Q&A button (on accordion trigger row) ───────────────────────────── */
+.qav-qa-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid transparent;
+  border-radius: 7px;
+  background: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition);
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.qav-accordion-trigger:hover .qav-qa-delete-btn,
+.qav-accordion-item.open .qav-qa-delete-btn {
+  opacity: 1;
+}
+
+.qav-qa-delete-btn:hover {
+  border-color: rgba(239,68,68,0.35);
+  color: #ef4444;
+  background: rgba(239,68,68,0.07);
+}
+
+/* ── Delete confirmation overlay ────────────────────────────────────────────── */
+.qav-confirm-overlay {
+  padding: 0 18px 6px;
+  animation: qav-confirm-in 0.18s ease;
+}
+
+@keyframes qav-confirm-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.qav-confirm-box {
+  background: rgba(239,68,68,0.05);
+  border: 1.5px solid rgba(239,68,68,0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.qav-confirm-box p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex: 1;
+  min-width: 0;
+}
+
+.qav-confirm-box strong {
+  color: var(--text-primary);
+}
+
+.qav-confirm-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ── View-only badge (on document answers) ──────────────────────────────────── */
+.qav-view-only-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-faint);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ── Dark theme ──────────────────────────────────────────────────────────────── */
+[data-theme="dark"] .qav-edit-textarea {
+  background: #181a26;
+  color: var(--text-primary);
+  border-color: #3a3d58;
+}
+[data-theme="dark"] .qav-confirm-box {
+  background: rgba(239,68,68,0.08);
+  border-color: rgba(239,68,68,0.30);
+}
+[data-theme="dark"] .qav-text-answer.editing {
+  background: #1c1e2c;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   QAView — Edit / Delete (text data only)
+═════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Answer action buttons row (hidden until hover) ─────────────────────────── */
+.qav-answer-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.qav-text-answer:hover .qav-answer-actions,
+.qav-text-answer.editing .qav-answer-actions {
+  opacity: 1;
+}
+
+/* ── Base action button ──────────────────────────────────────────────────────── */
+.qav-act-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.qav-act-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Edit */
+.qav-act-edit:hover {
+  border-color: var(--indigo);
+  color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+/* Delete */
+.qav-act-delete:hover {
+  border-color: rgba(239,68,68,0.4);
+  color: #ef4444;
+  background: rgba(239,68,68,0.07);
+}
+
+/* Save */
+.qav-act-save {
+  border-color: rgba(16,185,129,0.5);
+  color: #059669;
+  background: rgba(16,185,129,0.07);
+}
+.qav-act-save:hover:not(:disabled) {
+  background: rgba(16,185,129,0.14);
+}
+
+/* Cancel */
+.qav-act-cancel:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+  background: var(--bg-tint);
+}
+
+/* ── Editing state on answer card ────────────────────────────────────────────── */
+.qav-text-answer.editing {
+  border-color: var(--border-focus);
+  background: var(--bg-white);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.07);
+}
+
+/* ── Deleting fade ───────────────────────────────────────────────────────────── */
+.qav-text-answer.deleting {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.qav-item-removing {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+/* ── Inline edit textarea ────────────────────────────────────────────────────── */
+.qav-edit-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border-focus);
+  border-radius: var(--radius-sm);
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--bg-white);
+  line-height: 1.7;
+  resize: vertical;
+  min-height: 76px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.qav-edit-textarea:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.10);
+}
+
+.qav-edit-hint {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin-top: 5px;
+}
+
+/* ── Loading spinner inside buttons ─────────────────────────────────────────── */
+.qav-spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--border);
+  border-top-color: var(--indigo);
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+
+/* ── Delete Q&A button on accordion trigger ──────────────────────────────────── */
+.qav-qa-del-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 1.5px solid transparent;
+  border-radius: 7px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  opacity: 0;
+}
+
+/* Show on trigger hover or when item is open */
+.qav-accordion-trigger:hover .qav-qa-del-btn,
+.qav-accordion-item.open .qav-qa-del-btn {
+  opacity: 1;
+}
+
+.qav-qa-del-btn:hover {
+  border-color: rgba(239,68,68,0.35);
+  color: #ef4444;
+  background: rgba(239,68,68,0.07);
+}
+
+/* ── Delete confirm strip (appears below trigger, above body) ────────────────── */
+.qav-confirm-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 11px 18px;
+  background: rgba(239,68,68,0.05);
+  border-top: 1px solid rgba(239,68,68,0.15);
+  border-bottom: 1px solid rgba(239,68,68,0.15);
+  animation: qav-strip-in 0.18s ease;
+}
+
+@keyframes qav-strip-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.qav-confirm-msg {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex: 1;
+  min-width: 0;
+}
+
+.qav-confirm-msg strong {
+  color: var(--text-primary);
+}
+
+.qav-confirm-btns {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+/* ── View-only tag on document answers ───────────────────────────────────────── */
+.qav-view-only-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-faint);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* ── Dark theme ──────────────────────────────────────────────────────────────── */
+[data-theme="dark"] .qav-edit-textarea {
+  background: #181a26;
+  border-color: #3a3d58;
+  color: var(--text-primary);
+}
+[data-theme="dark"] .qav-text-answer.editing {
+  background: #1c1e2c;
+  border-color: #4f52a0;
+}
+[data-theme="dark"] .qav-confirm-strip {
+  background: rgba(239,68,68,0.09);
+  border-color: rgba(239,68,68,0.22);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   CriticismPage — Topic card grid (csp-*)
+═════════════════════════════════════════════════════════════════════════════ */
+
+.csp-topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.csp-topic-card {
+  background: var(--bg-white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color var(--transition), box-shadow var(--transition), transform 0.18s;
+}
+
+.csp-topic-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+.csp-topic-card.active {
+  border-color: var(--indigo);
+  background: var(--indigo-soft);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.10);
+}
+
+.csp-topic-card.deleting {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Card top row */
+.csp-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.csp-card-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.csp-card-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.csp-card-del {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid transparent;
+  border-radius: 7px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.csp-topic-card:hover .csp-card-del {
+  opacity: 1;
+}
+
+.csp-card-del:hover {
+  border-color: rgba(239,68,68,0.35);
+  color: #ef4444;
+  background: rgba(239,68,68,0.07);
+}
+
+/* Entry count badge */
+.csp-card-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.csp-count-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--indigo);
+  flex-shrink: 0;
+}
+
+/* Card action buttons */
+.csp-card-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.csp-btn-add {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.csp-btn-add:hover {
+  border-color: var(--indigo);
+  color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+.csp-btn-add.active {
+  border-color: var(--indigo);
+  color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+.csp-btn-view {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--indigo);
+  border-radius: var(--radius-sm);
+  background: var(--indigo);
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.csp-btn-view:hover {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.30);
+}
+
+/* View link (in form header row) */
+.csp-view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.csp-view-link:hover {
+  border-color: var(--indigo);
+  color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+/* Dark */
+[data-theme="dark"] .csp-topic-card {
+  background: #1c1e2c;
+  border-color: #2e3148;
+}
+[data-theme="dark"] .csp-topic-card.active {
+  background: rgba(99,102,241,0.12);
+}
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   CriticismListPage (csl-*)
+═════════════════════════════════════════════════════════════════════════════ */
+
+.csl-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100vh;
+  background: var(--bg-base);
+  padding: 0;
+}
+
+/* ── Page header ── */
+.csl-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 28px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-white);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.csl-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.csl-back-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background: var(--bg-tint);
+}
+
+.csl-header-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.csl-header-icon {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.csl-header-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.csl-header-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  margin: 2px 0 0;
+}
+
+/* ── Filters bar ── */
+.csl-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-faint);
+  flex-wrap: wrap;
+}
+
+.csl-search {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.csl-filter-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.csl-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.csl-filter-pill:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.csl-filter-pill.active {
+  border-color: var(--indigo);
+  color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+/* ── Split body ── */
+.csl-body {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── List panel ── */
+.csl-list-panel {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-base);
+}
+
+.csl-list-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: var(--bg-white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: border-color var(--transition), box-shadow var(--transition), transform 0.15s;
+  padding: 0;
+}
+
+.csl-list-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(2px);
+}
+
+.csl-list-card.active {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.10);
+}
+
+/* Severity colour stripe on left edge */
+.csl-card-stripe {
+  width: 3px;
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
+.csl-card-body {
+  flex: 1;
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.csl-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 7px;
+  flex-wrap: wrap;
+}
+
+.csl-card-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-left: auto;
+  letter-spacing: 0.04em;
+}
+
+.csl-card-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.45;
+  margin: 0 0 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.csl-card-detail {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin: 0 0 7px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.csl-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── Empty state ── */
+.csl-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 280px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── Detail panel ── */
+.csl-detail-panel {
+  overflow-y: auto;
+  padding: 24px 28px;
+  background: var(--bg-base);
+}
+
+.csl-detail {
+  max-width: 680px;
+  transition: opacity 0.2s;
+}
+
+.csl-detail--deleting {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.csl-detail--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  gap: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.csl-empty-icon {
+  font-size: 40px;
+  opacity: 0.4;
+}
+
+/* Detail header */
+.csl-detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.csl-detail-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.csl-detail-actions {
+  display: flex;
+  gap: 7px;
+}
+
+/* Detail content */
+.csl-detail-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin: 0 0 10px;
+}
+
+.csl-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.csl-detail-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.75;
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--bg-faint);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* Confirm strip */
+.csl-confirm-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: rgba(239,68,68,0.05);
+  border: 1.5px solid rgba(239,68,68,0.20);
+  border-radius: var(--radius-md);
+  animation: qav-strip-in 0.18s ease;
+}
+
+.csl-confirm-msg {
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex: 1;
+  min-width: 0;
+}
+
+.csl-confirm-msg strong { color: var(--text-primary); }
+
+.csl-confirm-btns {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+/* Action buttons (shared with qav-act-btn pattern) */
+.csl-act-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.csl-act-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.csl-act-edit:hover  { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-soft); }
+.csl-act-delete:hover { border-color: rgba(239,68,68,0.4); color: #ef4444; background: rgba(239,68,68,0.07); }
+.csl-act-save { border-color: rgba(16,185,129,0.5); color: #059669; background: rgba(16,185,129,0.07); }
+.csl-act-save:hover:not(:disabled) { background: rgba(16,185,129,0.14); }
+.csl-act-cancel:hover { border-color: var(--border-hover); color: var(--text-secondary); background: var(--bg-tint); }
+
+/* Edit form */
+.csl-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.csl-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.csl-edit-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--text-muted);
+}
+
+.csl-edit-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Notes */
+.csl-note-card {
+  background: var(--bg-faint);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px 12px;
+  margin-top: 6px;
+}
+
+.csl-note-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 6px 0 0;
+}
+
+/* Document link */
+.csl-doc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-faint);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  color: var(--indigo);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition);
+  margin-top: 6px;
+}
+
+.csl-doc-link:hover {
+  border-color: var(--indigo);
+  background: var(--indigo-soft);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .csl-body {
+    grid-template-columns: 1fr;
+  }
+  .csl-detail-panel {
+    border-top: 1px solid var(--border);
+    padding: 18px 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .csl-header { padding: 14px 16px; }
+  .csl-filters { padding: 10px 14px; }
+  .csl-list-panel { padding: 10px 8px; }
+  .csp-topic-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Dark theme */
+[data-theme="dark"] .csl-header,
+[data-theme="dark"] .csl-filters { background: #1a1c2a; border-color: #2e3148; }
+[data-theme="dark"] .csl-list-card { background: #1c1e2c; border-color: #2e3148; }
+[data-theme="dark"] .csl-list-card.active { border-color: #6366f1; background: rgba(99,102,241,0.10); }
+[data-theme="dark"] .csl-detail-body { background: #181a26; border-color: #2e3148; }
+[data-theme="dark"] .csl-note-card { background: #181a26; border-color: #2e3148; }
+[data-theme="dark"] .csl-confirm-strip { background: rgba(239,68,68,0.09); border-color: rgba(239,68,68,0.25); }
