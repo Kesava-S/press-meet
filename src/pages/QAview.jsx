@@ -252,7 +252,7 @@ function normalizeQAList(raw, topicName) {
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export default function QaView() {
+export default function Qaview() {
   const [appReady, setAppReady]           = useState(false);
   const [topics, setTopics]               = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(null);
