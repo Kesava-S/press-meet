@@ -226,8 +226,8 @@ export default function DashboardLayout() {
 
   const handleLogout = () => { logout(); navigate("/login"); };
 
-  const initials = user?.name
-    ? user.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+  const initials = user?.username
+    ? user.username.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
     : user?.email?.[0]?.toUpperCase() ?? "?";
 
   // Which page title to show in mobile top bar
@@ -342,7 +342,7 @@ export default function DashboardLayout() {
           <div className="dash-user-card">
             <div className="dash-user-avatar">{initials}</div>
             <div className="dash-user-info">
-              <span className="dash-user-name">{user?.name ?? "User"}</span>
+              <span className="dash-user-name">{user?.username ?? "User"}</span>
               <span className="dash-user-email">{user?.email ?? ""}</span>
             </div>
             <button className="dash-logout-btn" onClick={handleLogout} title="Log out">

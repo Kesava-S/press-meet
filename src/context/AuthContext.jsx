@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
   const login = useCallback((userData = {}, token = null) => {
     if (token) localStorage.setItem("auth_token", token);
     localStorage.setItem("auth",      "true");
-    localStorage.setItem("auth_user", JSON.stringify(userData));
+    localStorage.setItem("auth_user", JSON.stringify(userData));    
     setUser(userData);
   }, []);
 

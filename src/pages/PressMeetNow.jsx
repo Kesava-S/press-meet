@@ -5,17 +5,17 @@ const BASE = import.meta.env.VITE_N8N_WEBHOOK_URL;
 
 // ── Sentiment config ───────────────────────────────────────────────────────────
 const SENTIMENT_MAP = {
-  hostile:  { label: "Hostile",  color: "#ef4444", bg: "rgba(239,68,68,0.08)",    icon: "🔴" },
-  negative: { label: "Negative", color: "#f59e0b", bg: "rgba(245,158,11,0.08)",   icon: "🟡" },
-  neutral:  { label: "Neutral",  color: "#6366f1", bg: "rgba(99,102,241,0.08)",   icon: "🔵" },
-  positive: { label: "Positive", color: "#10b981", bg: "rgba(16,185,129,0.08)",   icon: "🟢" },
+  hostile: { label: "Hostile", color: "#ef4444", bg: "rgba(239,68,68,0.08)", icon: "🔴" },
+  negative: { label: "Negative", color: "#f59e0b", bg: "rgba(245,158,11,0.08)", icon: "🟡" },
+  neutral: { label: "Neutral", color: "#6366f1", bg: "rgba(99,102,241,0.08)", icon: "🔵" },
+  positive: { label: "Positive", color: "#10b981", bg: "rgba(16,185,129,0.08)", icon: "🟢" },
 };
 
 const TAG_MAP = {
-  criticism:   { color: "#ef4444", bg: "rgba(239,68,68,0.09)" },
-  question:    { color: "#3b82f6", bg: "rgba(59,130,246,0.09)" },
-  accusation:  { color: "#f59e0b", bg: "rgba(245,158,11,0.09)" },
-  answer:      { color: "#10b981", bg: "rgba(16,185,129,0.09)" },
+  criticism: { color: "#ef4444", bg: "rgba(239,68,68,0.09)" },
+  question: { color: "#3b82f6", bg: "rgba(59,130,246,0.09)" },
+  accusation: { color: "#f59e0b", bg: "rgba(245,158,11,0.09)" },
+  answer: { color: "#10b981", bg: "rgba(16,185,129,0.09)" },
 };
 
 // ── Mini components ────────────────────────────────────────────────────────────
@@ -79,9 +79,9 @@ function CopyButton({ text }) {
   return (
     <button className="pm2-icon-btn" onClick={copy} title="Copy to clipboard">
       {copied ? (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
       ) : (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
       )}
     </button>
   );
@@ -126,7 +126,7 @@ function AnswerCard({ answer, question, onTranslate, translating, translated, sh
           <button className="pm2-icon-btn" onClick={() => setExpanded(p => !p)} title={expanded ? "Collapse" : "Expand"}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
               style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-              <polyline points="6 9 12 15 18 9"/>
+              <polyline points="6 9 12 15 18 9" />
             </svg>
           </button>
         </div>
@@ -146,8 +146,8 @@ function AnswerCard({ answer, question, onTranslate, translating, translated, sh
       <div className={`pm2-answer-body ${expanded ? "open" : ""}`}>
         <div className="pm2-answer-text" style={{
           fontFamily: showTamil ? "'Noto Sans Tamil','Latha',sans-serif" : "inherit",
-          fontSize:   showTamil ? "15px" : "14px",
-          lineHeight: showTamil ? "1.9"  : "1.75",
+          fontSize: showTamil ? "15px" : "14px",
+          lineHeight: showTamil ? "1.9" : "1.75",
         }}>
           {displayText}
         </div>
@@ -159,27 +159,27 @@ function AnswerCard({ answer, question, onTranslate, translating, translated, sh
 // ── Main Component ─────────────────────────────────────────────────────────────
 export default function PressMeetNow() {
 
-  const [appReady, setAppReady]   = useState(false);
+  const [appReady, setAppReady] = useState(false);
   const [listening, setListening] = useState(false);
-  const [language, setLanguage]   = useState("en-US");
+  const [language, setLanguage] = useState("en-US");
 
   // Question
   const [question, setQuestion] = useState("");
 
   // Answer + loading
-  const [answer, setAnswer]   = useState("");
+  const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Translation
-  const [translating, setTranslating]   = useState(false);
-  const [translated, setTranslated]     = useState("");
-  const [showTamil, setShowTamil]       = useState(false);
+  const [translating, setTranslating] = useState(false);
+  const [translated, setTranslated] = useState("");
+  const [showTamil, setShowTamil] = useState(false);
   const [translateErr, setTranslateErr] = useState("");
 
   // AI-parsed metadata from response
   const [sentiment, setSentiment] = useState("neutral");
-  const [tags, setTags]           = useState([]);
-  const [topic, setTopic]         = useState("");
+  const [tags, setTags] = useState([]);
+  const [topic, setTopic] = useState("");
 
   // Session history (for chat-like feel)
   const [history, setHistory] = useState([]);
@@ -188,7 +188,7 @@ export default function PressMeetNow() {
   const [analyzing, setAnalyzing] = useState(false);
 
   const recognitionRef = useRef(null);
-  const answerRef      = useRef(null);
+  const answerRef = useRef(null);
 
   // ── Init speech recognition ────────────────────────────────────────────────
   useEffect(() => {
@@ -196,29 +196,33 @@ export default function PressMeetNow() {
     if (!SR) { setAppReady(true); return; }
 
     const rec = new SR();
-    rec.lang           = language;
+    rec.lang = language;
     rec.interimResults = true;
-    rec.continuous     = false;
+    rec.continuous = false;
 
     rec.onresult = (e) => {
       let t = "";
       for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
       setQuestion(t);
     };
-    rec.onend   = () => setListening(false);
+    rec.onend = () => setListening(false);
     rec.onerror = () => setListening(false);
 
     recognitionRef.current = rec;
     setTimeout(() => setAppReady(true), 600);
   }, [language]);
 
-  // ── Start listening ────────────────────────────────────────────────────────
-  const startListening = () => {
+  // ── Toggle listen / stop ───────────────────────────────────────────────────
+  const toggleListening = () => {
     if (!recognitionRef.current) return;
-    setAnswer(""); setTranslated(""); setShowTamil(false);
-    setTags([]); setSentiment("neutral"); setTopic("");
-    setListening(true);
-    recognitionRef.current.start();
+    if (listening) {
+      recognitionRef.current.stop();          // onend fires → setListening(false)
+    } else {
+      setAnswer(""); setTranslated(""); setShowTamil(false);
+      setTags([]); setSentiment("neutral"); setTopic("");
+      setListening(true);
+      recognitionRef.current.start();
+    }
   };
 
   // ── Get answer ─────────────────────────────────────────────────────────────
@@ -231,9 +235,9 @@ export default function PressMeetNow() {
 
     try {
       const res = await fetch(`${BASE}/meet-ask-ai`, {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ question, language }),
+        body: JSON.stringify({ question, language }),
       });
       if (!res.ok) throw new Error("Webhook failed");
 
@@ -246,10 +250,10 @@ export default function PressMeetNow() {
       // Falls back to plain text if not JSON
       try {
         const json = JSON.parse(raw);
-        answerText        = json.answer ?? json.text ?? json.output ?? raw;
-        meta.sentiment    = json.sentiment ?? "neutral";
-        meta.tags         = Array.isArray(json.tags) ? json.tags : [];
-        meta.topic        = json.topic ?? "";
+        answerText = json.answer ?? json.text ?? json.output ?? raw;
+        meta.sentiment = json.sentiment ?? "neutral";
+        meta.tags = Array.isArray(json.tags) ? json.tags : [];
+        meta.topic = json.topic ?? "";
       } catch { /* plain text */ }
 
       setAnswer(answerText || "No answer received.");
@@ -259,13 +263,13 @@ export default function PressMeetNow() {
 
       // Add to session history
       setHistory(prev => [{
-        id:        Date.now(),
+        id: Date.now(),
         question,
-        answer:    answerText,
+        answer: answerText,
         sentiment: meta.sentiment || "neutral",
-        tags:      meta.tags || [],
-        topic:     meta.topic || "",
-        time:      new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+        tags: meta.tags || [],
+        topic: meta.topic || "",
+        time: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
       }, ...prev]);
 
       // Scroll to answer
@@ -288,9 +292,9 @@ export default function PressMeetNow() {
     setTranslating(true); setTranslateErr("");
     try {
       const res = await fetch(`${BASE}/meet-translate`, {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ text: answer.trim(), targetLanguage: "ta", sourceLanguage: "en" }),
+        body: JSON.stringify({ text: answer.trim(), targetLanguage: "ta", sourceLanguage: "en" }),
       });
       if (!res.ok) throw new Error("Translation failed");
 
@@ -359,20 +363,26 @@ export default function PressMeetNow() {
               {/* Big mic button */}
               <button
                 className={`pm2-mic-btn ${listening ? "listening" : ""}`}
-                onClick={startListening}
-                aria-label={listening ? "Listening" : "Tap to listen"}
+                onClick={toggleListening}
+                aria-label={listening ? "Tap to stop" : "Tap to listen"}
               >
                 <span className="pm2-mic-ring pm2-mic-ring--1" />
                 <span className="pm2-mic-ring pm2-mic-ring--2" />
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <line x1="12" y1="19" x2="12" y2="23"/>
-                  <line x1="8" y1="23" x2="16" y2="23"/>
-                </svg>
+                {listening ? (
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="4" y="4" width="16" height="16" rx="3" />
+                  </svg>
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                  </svg>
+                )}
                 <span className="pm2-mic-label">
-                  {listening ? "Listening…" : "Tap to Listen"}
+                  {listening ? "Tap to Stop" : "Tap to Listen"}
                 </span>
               </button>
 
