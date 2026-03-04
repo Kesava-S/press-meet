@@ -15,11 +15,9 @@ import GoogleCallback    from "./pages/Googlecallback";
 
 // App pages
 import PressMeetNow      from "./pages/PressMeetNow";
-import QAPage            from "./pages/QAPage";
-import QAView            from "./pages/QAViewer";
 import SettingsPage      from "./pages/SettingsPage";
 
-// ── Data section sub-pages ──
+// Data section
 import CriticismPage     from "./pages/data/CriticismPage";
 import CriticismListPage from "./pages/data/CriticismListPage";
 import DocumentsPage     from "./pages/data/DocumentsPage";
@@ -54,20 +52,21 @@ export default function App() {
           <Route index element={<Navigate to="pressmeet" replace />} />
 
           <Route path="pressmeet" element={<PressMeetNow />} />
-          <Route path="qa"        element={<QAPage />} />
-          <Route path="qaview"    element={<QAView />} />
           <Route path="settings"  element={<SettingsPage />} />
 
           {/* ── Data Section ── */}
           <Route path="data">
-            <Route index element={<Navigate to="criticism" replace />} />
-            <Route path="criticism"             element={<CriticismPage />} />
-            <Route path="criticism/list/:topic" element={<CriticismListPage />} />
-            <Route path="documents"             element={<DocumentsPage />} />
-            <Route path="party"                 element={<PartyDataPage />} />
+            <Route index element={<Navigate to="/app/data/criticism" replace />} />
+            <Route path="criticism"              element={<CriticismPage />} />
+            <Route path="criticism/list/:topic"  element={<CriticismListPage />} />
+            <Route path="documents"              element={<DocumentsPage />} />
+            <Route path="party"                  element={<PartyDataPage />} />
           </Route>
 
-          <Route path="documents" element={<Navigate to="/app/data/documents" replace />} />
+          {/* Legacy redirects */}
+          <Route path="qa"     element={<Navigate to="/app/data/criticism" replace />} />
+          <Route path="qaview" element={<Navigate to="/app/data/criticism" replace />} />
+
         </Route>
 
         <Route path="*" element={<Navigate to="/login" replace />} />

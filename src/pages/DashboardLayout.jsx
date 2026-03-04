@@ -44,15 +44,8 @@ const Icons = {
     </svg>
   ),
   qa: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-    </svg>
-  ),
-  qaview: (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
   ),
   settings: (
@@ -82,7 +75,6 @@ const Icons = {
 };
 
 // ── Nav structure ──────────────────────────────────────────────────────────────
-// Groups: flat item | collapsible group with children
 const NAV_GROUPS = [
   {
     type:  "item",
@@ -98,22 +90,10 @@ const NAV_GROUPS = [
     icon:  "data",
     key:   "data",
     children: [
-      { to: "/app/data/criticism", label: "Criticism",   icon: "criticism" },
-      { to: "/app/data/documents", label: "Documents",   icon: "documents" },
-      { to: "/app/data/party",     label: "Party Data",  icon: "partydata" },
+      { to: "/app/data/criticism", label: "Criticism & QA", icon: "criticism" },
+      { to: "/app/data/documents", label: "Documents",       icon: "documents" },
+      { to: "/app/data/party",     label: "Party Data",      icon: "partydata" },
     ],
-  },
-  {
-    type:  "item",
-    to:    "/app/qa",
-    label: "Q&A Manager",
-    icon:  "qa",
-  },
-  {
-    type:  "item",
-    to:    "/app/qaview",
-    label: "Q&A Viewer",
-    icon:  "qaview",
   },
 ];
 
@@ -124,8 +104,6 @@ function NavGroup({ group, isOpen, onToggle }) {
 
   return (
     <div className={`dash-nav-group ${isOpen || isChildActive ? "open" : ""}`}>
-
-      {/* Group trigger */}
       <button
         className={`dash-nav-item dash-nav-group-trigger ${isChildActive ? "child-active" : ""}`}
         onClick={onToggle}
@@ -138,15 +116,12 @@ function NavGroup({ group, isOpen, onToggle }) {
         {isChildActive && <span className="dash-nav-active-bar" />}
       </button>
 
-      {/* Children */}
       <div className="dash-nav-children">
         {group.children.map(child => (
           <NavLink
             key={child.to}
             to={child.to}
-            className={({ isActive }) =>
-              `dash-nav-child ${isActive ? "active" : ""}`
-            }
+            className={({ isActive }) => `dash-nav-child ${isActive ? "active" : ""}`}
           >
             <span className="dash-child-dot" />
             <span className="dash-nav-child-icon">{Icons[child.icon]}</span>
@@ -162,7 +137,6 @@ function NavGroup({ group, isOpen, onToggle }) {
 function GlobalSearch({ onClose }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
-
   useEffect(() => { inputRef.current?.focus(); }, []);
 
   return (
@@ -170,25 +144,17 @@ function GlobalSearch({ onClose }) {
       <div className="dash-search-box" onClick={e => e.stopPropagation()}>
         <div className="dash-search-input-wrap">
           {Icons.search}
-          <input
-            ref={inputRef}
-            className="dash-search-input"
-            placeholder="Search criticisms, documents, Q&A…"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-          />
+          <input ref={inputRef} className="dash-search-input"
+            placeholder="Search criticisms, Q&A, documents…"
+            value={query} onChange={e => setQuery(e.target.value)} />
           <kbd className="dash-search-esc" onClick={onClose}>ESC</kbd>
         </div>
-        {query && (
-          <div className="dash-search-hint">
-            Press Enter to search across all modules
-          </div>
-        )}
+        {query && <div className="dash-search-hint">Press Enter to search across all modules</div>}
         <div className="dash-search-shortcuts">
           <span>🎙️ PressMeet</span>
           <span>📊 Criticism</span>
+          <span>💬 Q&amp;A</span>
           <span>📄 Documents</span>
-          <span>❓ Q&amp;A</span>
         </div>
       </div>
     </div>
@@ -201,61 +167,46 @@ export default function DashboardLayout() {
   const location         = useLocation();
   const { logout, user } = useAuth();
 
-  const [openGroups, setOpenGroups]     = useState({ data: true }); // data open by default
-  const [showSearch, setShowSearch]     = useState(false);
+  const [openGroups,    setOpenGroups]    = useState({ data: true });
+  const [showSearch,    setShowSearch]    = useState(false);
   const [mobileSidebar, setMobileSidebar] = useState(false);
 
-  // Keyboard shortcut: Cmd/Ctrl+K → open search
   useEffect(() => {
     const onKey = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setShowSearch(true);
-      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setShowSearch(true); }
       if (e.key === "Escape") setShowSearch(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Close mobile sidebar on route change
   useEffect(() => { setMobileSidebar(false); }, [location.pathname]);
 
-  const toggleGroup = (key) =>
-    setOpenGroups(p => ({ ...p, [key]: !p[key] }));
-
+  const toggleGroup = (key) => setOpenGroups(p => ({ ...p, [key]: !p[key] }));
   const handleLogout = () => { logout(); navigate("/login"); };
 
   const initials = user?.username
     ? user.username.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
     : user?.email?.[0]?.toUpperCase() ?? "?";
 
-  // Which page title to show in mobile top bar
   const getPageTitle = () => {
     const path = location.pathname;
     if (path.includes("pressmeet"))  return "PressMeet Now";
-    if (path.includes("criticism"))  return "Criticism";
+    if (path.includes("criticism"))  return "Criticism & QA";
     if (path.includes("documents"))  return "Documents";
     if (path.includes("party"))      return "Party Data";
-    if (path.includes("qa") && !path.includes("view")) return "Q&A Manager";
-    if (path.includes("qaview"))     return "Q&A Viewer";
     if (path.includes("settings"))   return "Settings";
     return "PressPilot AI";
   };
 
   return (
     <>
-      {/* Global search overlay */}
       {showSearch && <GlobalSearch onClose={() => setShowSearch(false)} />}
-
-      {/* Mobile overlay backdrop */}
       {mobileSidebar && (
         <div className="dash-mobile-backdrop" onClick={() => setMobileSidebar(false)} />
       )}
 
       <div className="dash-layout">
-
-        {/* ── Mobile top bar ── */}
         <div className="dash-mobile-bar">
           <button className="dash-hamburger" onClick={() => setMobileSidebar(p => !p)}>
             <span /><span /><span />
@@ -266,10 +217,7 @@ export default function DashboardLayout() {
           </button>
         </div>
 
-        {/* ── Sidebar ── */}
         <aside className={`dash-sidebar ${mobileSidebar ? "open" : ""}`}>
-
-          {/* Brand */}
           <div className="dash-brand">
             <div className="dash-brand-icon">🧩</div>
             <div className="dash-brand-text">
@@ -278,28 +226,14 @@ export default function DashboardLayout() {
             </div>
           </div>
 
-          {/* Global search button */}
-          {/* <button className="dash-search-trigger" onClick={() => setShowSearch(true)}>
-            <span className="dash-search-trigger-icon">{Icons.search}</span>
-            <span className="dash-search-trigger-text">Search…</span>
-            <kbd className="dash-search-kbd">⌘K</kbd>
-          </button> */}
-
-          {/* Nav label */}
           <div className="dash-nav-label">MAIN MENU</div>
 
-          {/* Scrollable nav area */}
           <nav className="dash-nav">
             {NAV_GROUPS.map(group => {
               if (group.type === "item") {
                 return (
-                  <NavLink
-                    key={group.to}
-                    to={group.to}
-                    className={({ isActive }) =>
-                      `dash-nav-item ${isActive ? "active" : ""}`
-                    }
-                  >
+                  <NavLink key={group.to} to={group.to}
+                    className={({ isActive }) => `dash-nav-item ${isActive ? "active" : ""}`}>
                     <span className="dash-nav-icon">{Icons[group.icon]}</span>
                     <span className="dash-nav-label-text">{group.label}</span>
                     {group.badge && (
@@ -311,34 +245,23 @@ export default function DashboardLayout() {
                   </NavLink>
                 );
               }
-
               return (
-                <NavGroup
-                  key={group.key}
-                  group={group}
+                <NavGroup key={group.key} group={group}
                   isOpen={!!openGroups[group.key]}
-                  onToggle={() => toggleGroup(group.key)}
-                />
+                  onToggle={() => toggleGroup(group.key)} />
               );
             })}
           </nav>
 
-          {/* Spacer */}
           <div className="dash-spacer" />
 
-          {/* Settings */}
-          <NavLink
-            to="/app/settings"
-            className={({ isActive }) =>
-              `dash-nav-item dash-settings-item ${isActive ? "active" : ""}`
-            }
-          >
+          <NavLink to="/app/settings"
+            className={({ isActive }) => `dash-nav-item dash-settings-item ${isActive ? "active" : ""}`}>
             <span className="dash-nav-icon">{Icons.settings}</span>
             <span className="dash-nav-label-text">Settings</span>
             <span className="dash-nav-active-bar" />
           </NavLink>
 
-          {/* User card */}
           <div className="dash-user-card">
             <div className="dash-user-avatar">{initials}</div>
             <div className="dash-user-info">
@@ -349,14 +272,11 @@ export default function DashboardLayout() {
               {Icons.logout}
             </button>
           </div>
-
         </aside>
 
-        {/* ── Main content ── */}
         <main className="dash-main">
           <Outlet />
         </main>
-
       </div>
     </>
   );
