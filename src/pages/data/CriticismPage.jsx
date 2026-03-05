@@ -421,8 +421,8 @@ export default function CriticismPage() {
       proofFiles.forEach((pf, i) => fd.append(`proof_${i}`, pf.file, pf.fileName));
       fd.append("proofCount", proofFiles.length);
       const res = await fetch(`${BASE}/meet-save-criticism`, { method: "POST", body: fd });
-      if (!res.ok) throw new Error();
-      fetch(`${BASE}/meet-embed-qa`, { method: "GET" }).catch(() => { });
+      if (!res.ok) throw new Error();      
+      fetch(`${BASE}/meet-embed-criticism`, { method: "GET" }).catch(() => { });
       setTopicCounts(p => ({ ...p, [selectedTopic.name]: (p[selectedTopic.name] || 0) + 1 }));
       showToast("Criticism saved ✓");
       resetCriticism();

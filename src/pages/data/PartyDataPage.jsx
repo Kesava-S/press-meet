@@ -364,6 +364,7 @@ export default function PartyDataPage() {
       // Prefer server-assigned record if returned
       const saved = await res.json().catch(() => null);
       setMembers(p => [...p, saved?.id ? saved : newM]);
+      fetchMembers();
     } catch {
       setMembers(p => [...p, newM]); // optimistic fallback
     } finally {

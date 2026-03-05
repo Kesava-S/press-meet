@@ -36,7 +36,7 @@ export default function SettingsPage() {
     setSaving(true);
     setSaveMsg("");
     try {
-      const res = await fetch(`${BASE}-test/meet-update-profile`, {
+      const res = await fetch(`${BASE}/meet-update-profile`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
