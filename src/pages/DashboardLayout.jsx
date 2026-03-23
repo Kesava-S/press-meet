@@ -72,6 +72,12 @@ const Icons = {
       <line x1="21" y1="12" x2="9" y2="12"/>
     </svg>
   ),
+  history: (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+  ),
 };
 
 // ── Nav structure ──────────────────────────────────────────────────────────────
@@ -85,12 +91,18 @@ const NAV_GROUPS = [
     badgeColor: "#ef4444",
   },
   {
+    type:  "item",
+    to:    "/app/history",
+    label: "Session History",
+    icon:  "history",
+  },
+  {
     type:  "group",
     label: "Data Section",
     icon:  "data",
     key:   "data",
     children: [
-      { to: "/app/data/criticism", label: "Criticism & QA", icon: "criticism" },
+      { to: "/app/data/criticism", label: "Criticism & Q&A", icon: "criticism" },
       { to: "/app/data/documents", label: "Documents",       icon: "documents" },
       { to: "/app/data/party",     label: "Party Data",      icon: "partydata" },
     ],
@@ -192,7 +204,8 @@ export default function DashboardLayout() {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path.includes("pressmeet"))  return "PressMeet Now";
-    if (path.includes("criticism"))  return "Criticism & QA";
+    if (path.includes("history"))    return "Session History";
+    if (path.includes("criticism"))  return "Criticism & Q&A";
     if (path.includes("documents"))  return "Documents";
     if (path.includes("party"))      return "Party Data";
     if (path.includes("settings"))   return "Settings";

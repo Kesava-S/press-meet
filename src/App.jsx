@@ -2,26 +2,28 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import { AuthProvider }  from "./context/AuthContext";
-import ProtectedRoute    from "./components/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Layout
-import DashboardLayout   from "./pages/DashboardLayout";
+import DashboardLayout from "./pages/DashboardLayout";
 
 // Public
-import LoginPage         from "./pages/LoginPage";
-import RegisterPage      from "./pages/RegisterPage";
-import GoogleCallback    from "./pages/Googlecallback";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import GoogleCallback from "./pages/Googlecallback";
 
 // App pages
-import PressMeetNow      from "./pages/PressMeetNow";
-import SettingsPage      from "./pages/SettingsPage";
+import PressMeetNow from "./pages/PressMeetNow";
+import SettingsPage from "./pages/SettingsPage";
 
 // Data section
-import CriticismPage     from "./pages/data/CriticismPage";
+import CriticismPage from "./pages/data/CriticismPage";
 import CriticismListPage from "./pages/data/CriticismListPage";
-import DocumentsPage     from "./pages/data/DocumentsPage";
-import PartyDataPage     from "./pages/data/PartyDataPage";
+import DocumentsPage from "./pages/data/DocumentsPage";
+import PartyDataPage from "./pages/data/PartyDataPage";
+
+import PressMeetHistory from "./pages/PressMeetHistory";
 
 export default function App() {
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function App() {
       <Routes>
 
         {/* ── Public routes ── */}
-        <Route path="/login"    element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
         {/* ── Google OAuth callback ── */}
@@ -52,19 +54,20 @@ export default function App() {
           <Route index element={<Navigate to="pressmeet" replace />} />
 
           <Route path="pressmeet" element={<PressMeetNow />} />
-          <Route path="settings"  element={<SettingsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="history" element={<PressMeetHistory />} />
 
           {/* ── Data Section ── */}
           <Route path="data">
             <Route index element={<Navigate to="/app/data/criticism" replace />} />
-            <Route path="criticism"              element={<CriticismPage />} />
-            <Route path="criticism/list/:topic"  element={<CriticismListPage />} />
-            <Route path="documents"              element={<DocumentsPage />} />
-            <Route path="party"                  element={<PartyDataPage />} />
+            <Route path="criticism" element={<CriticismPage />} />
+            <Route path="criticism/list/:topic" element={<CriticismListPage />} />
+            <Route path="documents" element={<DocumentsPage />} />
+            <Route path="party" element={<PartyDataPage />} />
           </Route>
 
           {/* Legacy redirects */}
-          <Route path="qa"     element={<Navigate to="/app/data/criticism" replace />} />
+          <Route path="qa" element={<Navigate to="/app/data/criticism" replace />} />
           <Route path="qaview" element={<Navigate to="/app/data/criticism" replace />} />
 
         </Route>

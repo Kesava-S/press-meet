@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./globals.css";
+import { useAuth } from "../context/AuthContext";
 
 const BASE = import.meta.env.VITE_N8N_WEBHOOK_URL;
 
@@ -120,7 +121,6 @@ function fileEmoji(url = "") {
   if (["mp3","wav"].includes(ext)) return "🎵";
   return "📎";
 }
-
 function fileName(url = "") {
   if (isGDrive(url)) return gDriveLabel(url);
   try {
@@ -219,8 +219,42 @@ function AnswerCard({ answer, question, onTranslate, translating, translated, sh
   );
 }
 
+// ── Save to n8n history table ──────────────────────────────────────────────────
+async function saveHistoryToN8n(userId, userName, entry) {
+  try {
+    await fetch(`${BASE}/meet-save-history`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        userName,
+        sessionId:  entry.sessionId,
+        question:   entry.question,
+        answer:     entry.answer,
+        sentiment:  entry.sentiment,
+        tags:       JSON.stringify(entry.tags || []),
+        topic:      entry.topic || "",
+        proofDocs:  (entry.proofs || []).join(","),
+        language:   entry.language || "en-US",
+        askedAt:    entry.time,
+        createdAt:  new Date().toISOString(),
+      }),
+    });
+  } catch (err) {
+    console.warn("History save failed (non-blocking):", err);
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 export default function PressMeetNow() {
+
+  // ── Auth ───────────────────────────────────────────────────────────────────
+  const { user } = useAuth();
+  const userId   = user?.id    || user?.userId  || user?.email || "anonymous";
+  const userName = user?.name  || user?.email   || "Unknown";
+
+  // ── Session ID — unique per browser session ────────────────────────────────
+  const sessionId = useRef(`session_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
 
   const [appReady,  setAppReady]  = useState(false);
   const [listening, setListening] = useState(false);
@@ -240,9 +274,10 @@ export default function PressMeetNow() {
   const [proofs,    setProofs]    = useState([]);
   const [history,   setHistory]   = useState([]);
   const [analyzing, setAnalyzing] = useState(false);
+  const [savingHistory, setSavingHistory] = useState(false);
 
   const recognitionRef = useRef(null);
-  const stoppingRef    = useRef(false);  // true when user intentionally stops
+  const stoppingRef    = useRef(false);
   const answerRef      = useRef(null);
 
   // ── Init speech recognition ────────────────────────────────────────────────
@@ -258,8 +293,7 @@ export default function PressMeetNow() {
     rec.onresult = (e) => {
       let t = "";
       for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
-      setQuestion(prev => {
-        // For continuous mode, append interim results properly
+      setQuestion(() => {
         const finals = [];
         for (let i = 0; i < e.results.length; i++) {
           if (e.results[i].isFinal) finals.push(e.results[i][0].transcript);
@@ -269,14 +303,11 @@ export default function PressMeetNow() {
       });
     };
 
-    // Auto-restart on natural end UNLESS user intentionally stopped
     rec.onend = () => {
       if (stoppingRef.current) {
-        // User tapped Stop — truly stop
         stoppingRef.current = false;
         setListening(false);
       } else {
-        // Natural end (browser timeout) — restart to keep listening
         setListening(curr => {
           if (curr && recognitionRef.current) {
             try { recognitionRef.current.start(); } catch {}
@@ -286,7 +317,7 @@ export default function PressMeetNow() {
       }
     };
     rec.onerror = (e) => {
-      if (e.error === "aborted") return; // fired alongside onend — handled there
+      if (e.error === "aborted") return;
       stoppingRef.current = false;
       setListening(false);
     };
@@ -298,14 +329,10 @@ export default function PressMeetNow() {
   // ── Toggle listen / stop ───────────────────────────────────────────────────
   const toggleListening = () => {
     if (!recognitionRef.current) return;
-
     if (listening) {
-      // ── STOP: mark intentional stop BEFORE calling .stop()
       stoppingRef.current = true;
       recognitionRef.current.stop();
-      // setListening(false) will be called in rec.onend
     } else {
-      // ── START: clear previous state and begin
       setAnswer(""); setTranslated(""); setShowTamil(false);
       setTags([]); setSentiment("neutral"); setTopic(""); setProofs([]);
       setListening(true);
@@ -317,7 +344,6 @@ export default function PressMeetNow() {
   const getAnswer = async () => {
     if (!question.trim()) return;
 
-    // If still listening, stop first before generating
     if (listening && recognitionRef.current) {
       stoppingRef.current = true;
       recognitionRef.current.stop();
@@ -332,7 +358,7 @@ export default function PressMeetNow() {
       const res = await fetch(`${BASE}/meet-ask-ai`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ question, language }),
+        body:    JSON.stringify({ question, language, userId, userName }),
       });
       if (!res.ok) throw new Error("Webhook failed");
 
@@ -346,7 +372,6 @@ export default function PressMeetNow() {
         meta.sentiment = json.sentiment ?? "neutral";
         meta.tags      = Array.isArray(json.tags) ? json.tags : [];
         meta.topic     = json.topic ?? "";
-        // proofs may be array, JSON array string, or comma-separated string
         const rawProofs = json.proofs;
         if (Array.isArray(rawProofs)) meta.proofs = rawProofs;
         else if (typeof rawProofs === "string") {
@@ -362,16 +387,26 @@ export default function PressMeetNow() {
       setTopic(meta.topic || "");
       setProofs(meta.proofs || []);
 
-      setHistory(prev => [{
+      // ── Build history entry ────────────────────────────────────────────────
+      const entry = {
         id:        Date.now(),
+        sessionId: sessionId.current,
         question,
         answer:    answerText,
         sentiment: meta.sentiment || "neutral",
         tags:      meta.tags || [],
         topic:     meta.topic || "",
         proofs:    meta.proofs || [],
+        language,
         time:      new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-      }, ...prev]);
+      };
+
+      setHistory(prev => [entry, ...prev]);
+
+      // ── Save to n8n data table (non-blocking) ──────────────────────────────
+      setSavingHistory(true);
+      saveHistoryToN8n(userId, userName, entry)
+        .finally(() => setSavingHistory(false));
 
       setTimeout(() => answerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
 
@@ -415,15 +450,13 @@ export default function PressMeetNow() {
     }
   };
 
-  // ── Mic button label & icon ────────────────────────────────────────────────
+  // ── Icons ──────────────────────────────────────────────────────────────────
   const micLabel = listening ? "Tap to Stop" : "Tap to Listen";
-
   const StopIcon = () => (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
       <rect x="4" y="4" width="16" height="16" rx="3"/>
     </svg>
   );
-
   const MicIcon = () => (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -446,6 +479,11 @@ export default function PressMeetNow() {
           <div className="qa-logo">🎙️</div>
           <span className="qa-title">PressMeet AI</span>
           <span className="qa-subtitle">Live Voice Assisted Answering</span>
+          {/* User badge */}
+          <span className="pm2-user-badge" title={`User ID: ${userId}`}>
+            👤 {userName}
+            {savingHistory && <span className="pm2-saving-dot" title="Saving…">●</span>}
+          </span>
         </div>
 
         <div className="qa-body">
@@ -454,7 +492,6 @@ export default function PressMeetNow() {
           <div className="section-label">Voice Input</div>
 
           <div className="pm2-mic-card">
-
             <div className="pm2-mic-top">
               <div className="pm2-mic-top-left">
                 <span className="qa-num">VOICE CAPTURE</span>
@@ -472,29 +509,21 @@ export default function PressMeetNow() {
             </div>
 
             <div className="pm2-mic-center">
-              {/* Waveform — visible when listening */}
               <div className={`pm2-waveform-wrap ${listening ? "visible" : ""}`}>
                 <WaveformBars />
               </div>
-
-              {/* ── Single toggle button: Listen ↔ Stop ── */}
               <button
                 className={`pm2-mic-btn ${listening ? "listening" : ""}`}
                 onClick={toggleListening}
                 aria-label={micLabel}
               >
-                {/* Animated rings only shown when listening */}
                 <span className="pm2-mic-ring pm2-mic-ring--1" />
                 <span className="pm2-mic-ring pm2-mic-ring--2" />
-
-                {/* Icon swaps between mic and stop square */}
                 <div className="pm2-mic-icon-wrap">
                   {listening ? <StopIcon /> : <MicIcon />}
                 </div>
-
                 <span className="pm2-mic-label">{micLabel}</span>
               </button>
-
               {listening && (
                 <p className="pm2-mic-hint">Speaking… tap the button to stop</p>
               )}
@@ -514,10 +543,8 @@ export default function PressMeetNow() {
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
               />
-
               <div className="pm2-question-footer">
                 <span className="pm2-char-count">{question.length} chars</span>
-
                 <div className="pm2-question-actions">
                   {question && (
                     <button className="pm2-clear-btn" onClick={() => {
@@ -543,7 +570,6 @@ export default function PressMeetNow() {
           {(answer || loading) && (
             <>
               <div className="divider" />
-
               <div className="pm2-meta-row" ref={answerRef}>
                 {topic && <span className="pm2-topic-badge">📌 {topic}</span>}
                 <SentimentBadge sentiment={sentiment} />
@@ -598,10 +624,10 @@ export default function PressMeetNow() {
                     </div>
                     <p className="pm2-history-q">❓ {item.question}</p>
                     <p className="pm2-history-a">{item.answer.slice(0, 160)}{item.answer.length > 160 ? "…" : ""}</p>
-                     {item.proofs?.length > 0 && (
+                    {item.proofs?.length > 0 && (
                       <div className="pm2-history-proofs">
                         {item.proofs.map((p, i) => {
-                          const url = typeof p === "string" ? p : (p.url || p.link || "");
+                          const url  = typeof p === "string" ? p : (p.url || p.link || "");
                           const name = typeof p === "object" && p.name ? p.name : fileName(url);
                           if (!url) return null;
                           return (
